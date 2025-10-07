@@ -130,6 +130,7 @@ class score:
         self.rect = self.img.get_rect()
         self.rect.topleft = (100, HEIGHT - 50)
 
+
     def add_point(self, points=1):
         """
         スコアを加算
@@ -182,6 +183,7 @@ def main():
     bird = Bird((300, 200))
     bomb = Bomb((255, 0, 0), 10)
     bombs = list()
+    beams = list()
     for _ in range(NUM_OF_BOMBS):
         bomb = Bomb((255, 0, 0), 10)
         bombs.append(bomb)
@@ -201,7 +203,7 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 # スペースキー押下でBeamクラスのインスタンス生成
-                beam = Beam(bird)            
+                beams.append(Beam(bird))            
         screen.blit(bg_img, [0, 0])
         
         for bomb in bombs:
@@ -215,18 +217,20 @@ def main():
                 time.sleep(1)
                 return
         
-        for b, bomb in enumerate(bombs):
-            if beam is not None:
-                if beam.rct.colliderect(bomb.rct):
-                    beam, bombs[b] = None, None
-                    bird.change_img(6, screen)
-                    sc.add_point(1)
+        for i, beam in enumerate(beams):
+            for b, bomb in enumerate(bombs):
+                if beam is not None and bomb is not None:
+                    if beam.rct.colliderect(bomb.rct):
+                        beams[i], bombs[b] = None, None
+                        bird.change_img(6, screen)
+                        sc.add_point(1)
 
+        beams = [b for b in beams if b is not None]
         bombs = [bomb for bomb in bombs if bomb is not None]
 
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
-        if beam is not None:
+        for beam in beams:
             beam.update(screen) 
         for bomb in bombs:
             bomb.update(screen)
